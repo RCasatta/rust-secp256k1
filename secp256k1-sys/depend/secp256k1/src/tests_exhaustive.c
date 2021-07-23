@@ -163,7 +163,7 @@ void test_exhaustive_addition(const rustsecp256k1_v0_4_1_ge *group, const rustse
     }
 }
 
-void test_exhaustive_ecmult(const rustsecp256k1_v0_4_1_context *ctx, const rustsecp256k1_v0_4_1_ge *group, const rustsecp256k1_v0_4_1_gej *groupj) {
+void test_exhaustive_ecmult(const rustsecp256k1_v0_4_1_ge *group, const rustsecp256k1_v0_4_1_gej *groupj) {
     int i, j, r_log;
     uint64_t iter = 0;
     for (r_log = 1; r_log < EXHAUSTIVE_TEST_ORDER; r_log++) {
@@ -175,7 +175,7 @@ void test_exhaustive_ecmult(const rustsecp256k1_v0_4_1_context *ctx, const rusts
                 rustsecp256k1_v0_4_1_scalar_set_int(&na, i);
                 rustsecp256k1_v0_4_1_scalar_set_int(&ng, j);
 
-                rustsecp256k1_v0_4_1_ecmult(&ctx->ecmult_ctx, &tmp, &groupj[r_log], &na, &ng);
+                rustsecp256k1_v0_4_1_ecmult(&tmp, &groupj[r_log], &na, &ng);
                 ge_equals_gej(&group[(i * r_log + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
 
                 if (i > 0) {
@@ -219,7 +219,7 @@ void test_exhaustive_ecmult_multi(const rustsecp256k1_v0_4_1_context *ctx, const
                         data.pt[0] = group[x];
                         data.pt[1] = group[y];
 
-                        rustsecp256k1_v0_4_1_ecmult_multi_var(&ctx->error_callback, &ctx->ecmult_ctx, scratch, &tmp, &g_sc, ecmult_multi_callback, &data, 2);
+                        rustsecp256k1_v0_4_1_ecmult_multi_var(&ctx->error_callback, scratch, &tmp, &g_sc, ecmult_multi_callback, &data, 2);
                         ge_equals_gej(&group[(i * x + j * y + k) % EXHAUSTIVE_TEST_ORDER], &tmp);
                     }
                 }
@@ -302,6 +302,7 @@ void test_exhaustive_sign(const rustsecp256k1_v0_4_1_context *ctx, const rustsec
             if (skip_section(&iter)) continue;
             for (k = 1; k < EXHAUSTIVE_TEST_ORDER; k++) {  /* nonce */
                 const int starting_k = k;
+                int ret;
                 rustsecp256k1_v0_4_1_ecdsa_signature sig;
                 rustsecp256k1_v0_4_1_scalar sk, msg, r, s, expected_r;
                 unsigned char sk32[32], msg32[32];
@@ -310,7 +311,8 @@ void test_exhaustive_sign(const rustsecp256k1_v0_4_1_context *ctx, const rustsec
                 rustsecp256k1_v0_4_1_scalar_get_b32(sk32, &sk);
                 rustsecp256k1_v0_4_1_scalar_get_b32(msg32, &msg);
 
-                rustsecp256k1_v0_4_1_ecdsa_sign(ctx, &sig, msg32, sk32, rustsecp256k1_v0_4_1_nonce_function_smallint, &k);
+                ret = rustsecp256k1_v0_4_1_ecdsa_sign(ctx, &sig, msg32, sk32, rustsecp256k1_v0_4_1_nonce_function_smallint, &k);
+                CHECK(ret == 1);
 
                 rustsecp256k1_v0_4_1_ecdsa_signature_load(ctx, &r, &s, &sig);
                 /* Note that we compute expected_r *after* signing -- this is important
@@ -428,7 +430,7 @@ int main(int argc, char** argv) {
         /* Run the tests */
         test_exhaustive_endomorphism(group);
         test_exhaustive_addition(group, groupj);
-        test_exhaustive_ecmult(ctx, group, groupj);
+        test_exhaustive_ecmult(group, groupj);
         test_exhaustive_ecmult_multi(ctx, group);
         test_exhaustive_sign(ctx, group);
         test_exhaustive_verify(ctx, group);

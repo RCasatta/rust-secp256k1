@@ -140,7 +140,7 @@ static int rustsecp256k1_v0_4_1_der_parse_integer(rustsecp256k1_v0_4_1_scalar *r
         overflow = 1;
     }
     if (!overflow) {
-        memcpy(ra + 32 - rlen, *sig, rlen);
+        if (rlen) memcpy(ra + 32 - rlen, *sig, rlen);
         rustsecp256k1_v0_4_1_scalar_set_b32(r, ra, &overflow);
     }
     if (overflow) {
@@ -204,7 +204,7 @@ static int rustsecp256k1_v0_4_1_ecdsa_sig_serialize(unsigned char *sig, size_t *
     return 1;
 }
 
-static int rustsecp256k1_v0_4_1_ecdsa_sig_verify(const rustsecp256k1_v0_4_1_ecmult_context *ctx, const rustsecp256k1_v0_4_1_scalar *sigr, const rustsecp256k1_v0_4_1_scalar *sigs, const rustsecp256k1_v0_4_1_ge *pubkey, const rustsecp256k1_v0_4_1_scalar *message) {
+static int rustsecp256k1_v0_4_1_ecdsa_sig_verify(const rustsecp256k1_v0_4_1_scalar *sigr, const rustsecp256k1_v0_4_1_scalar *sigs, const rustsecp256k1_v0_4_1_ge *pubkey, const rustsecp256k1_v0_4_1_scalar *message) {
     unsigned char c[32];
     rustsecp256k1_v0_4_1_scalar sn, u1, u2;
 #if !defined(EXHAUSTIVE_TEST_ORDER)
@@ -221,7 +221,7 @@ static int rustsecp256k1_v0_4_1_ecdsa_sig_verify(const rustsecp256k1_v0_4_1_ecmu
     rustsecp256k1_v0_4_1_scalar_mul(&u1, &sn, message);
     rustsecp256k1_v0_4_1_scalar_mul(&u2, &sn, sigr);
     rustsecp256k1_v0_4_1_gej_set_ge(&pubkeyj, pubkey);
-    rustsecp256k1_v0_4_1_ecmult(ctx, &pr, &pubkeyj, &u2, &u1);
+    rustsecp256k1_v0_4_1_ecmult(&pr, &pubkeyj, &u2, &u1);
     if (rustsecp256k1_v0_4_1_gej_is_infinity(&pr)) {
         return 0;
     }

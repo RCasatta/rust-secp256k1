@@ -18,8 +18,8 @@ static int rustsecp256k1_v0_4_1_eckey_pubkey_parse(rustsecp256k1_v0_4_1_ge *elem
 static int rustsecp256k1_v0_4_1_eckey_pubkey_serialize(rustsecp256k1_v0_4_1_ge *elem, unsigned char *pub, size_t *size, int compressed);
 
 static int rustsecp256k1_v0_4_1_eckey_privkey_tweak_add(rustsecp256k1_v0_4_1_scalar *key, const rustsecp256k1_v0_4_1_scalar *tweak);
-static int rustsecp256k1_v0_4_1_eckey_pubkey_tweak_add(const rustsecp256k1_v0_4_1_ecmult_context *ctx, rustsecp256k1_v0_4_1_ge *key, const rustsecp256k1_v0_4_1_scalar *tweak);
+static int rustsecp256k1_v0_4_1_eckey_pubkey_tweak_add(rustsecp256k1_v0_4_1_ge *key, const rustsecp256k1_v0_4_1_scalar *tweak);
 static int rustsecp256k1_v0_4_1_eckey_privkey_tweak_mul(rustsecp256k1_v0_4_1_scalar *key, const rustsecp256k1_v0_4_1_scalar *tweak);
-static int rustsecp256k1_v0_4_1_eckey_pubkey_tweak_mul(const rustsecp256k1_v0_4_1_ecmult_context *ctx, rustsecp256k1_v0_4_1_ge *key, const rustsecp256k1_v0_4_1_scalar *tweak);
+static int rustsecp256k1_v0_4_1_eckey_pubkey_tweak_mul(rustsecp256k1_v0_4_1_ge *key, const rustsecp256k1_v0_4_1_scalar *tweak);
 
 #endif /* SECP256K1_ECKEY_H */

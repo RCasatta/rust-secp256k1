@@ -197,19 +197,19 @@ void test_xonly_pubkey_tweak(void) {
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_from_pubkey(none, &internal_xonly_pk, &pk_parity, &internal_pk) == 1);
 
     ecount = 0;
-    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(none, &output_pk, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 1);
-    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(sign, &output_pk, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 2);
+    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(none, &output_pk, &internal_xonly_pk, tweak) == 1);
+    CHECK(ecount == 0);
+    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(sign, &output_pk, &internal_xonly_pk, tweak) == 1);
+    CHECK(ecount == 0);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(verify, &output_pk, &internal_xonly_pk, tweak) == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(verify, NULL, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 3);
+    CHECK(ecount == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(verify, &output_pk, NULL, tweak) == 0);
-    CHECK(ecount == 4);
+    CHECK(ecount == 2);
     /* NULL internal_xonly_pk zeroes the output_pk */
     CHECK(rustsecp256k1_v0_4_1_memcmp_var(&output_pk, zeros64, sizeof(output_pk)) == 0);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(verify, &output_pk, &internal_xonly_pk, NULL) == 0);
-    CHECK(ecount == 5);
+    CHECK(ecount == 3);
     /* NULL tweak zeroes the output_pk */
     CHECK(rustsecp256k1_v0_4_1_memcmp_var(&output_pk, zeros64, sizeof(output_pk)) == 0);
 
@@ -274,20 +274,20 @@ void test_xonly_pubkey_tweak_check(void) {
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(verify, &output_pk, &internal_xonly_pk, tweak) == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_from_pubkey(verify, &output_xonly_pk, &pk_parity, &output_pk) == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_serialize(ctx, buf32, &output_xonly_pk) == 1);
-    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(none, buf32, pk_parity, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 1);
-    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(sign, buf32, pk_parity, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 2);
+    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(none, buf32, pk_parity, &internal_xonly_pk, tweak) == 1);
+    CHECK(ecount == 0);
+    CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(sign, buf32, pk_parity, &internal_xonly_pk, tweak) == 1);
+    CHECK(ecount == 0);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(verify, buf32, pk_parity, &internal_xonly_pk, tweak) == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(verify, NULL, pk_parity, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 3);
+    CHECK(ecount == 1);
     /* invalid pk_parity value */
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(verify, buf32, 2, &internal_xonly_pk, tweak) == 0);
-    CHECK(ecount == 3);
+    CHECK(ecount == 1);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(verify, buf32, pk_parity, NULL, tweak) == 0);
-    CHECK(ecount == 4);
+    CHECK(ecount == 2);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(verify, buf32, pk_parity, &internal_xonly_pk, NULL) == 0);
-    CHECK(ecount == 5);
+    CHECK(ecount == 3);
 
     memset(tweak, 1, sizeof(tweak));
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_from_pubkey(ctx, &internal_xonly_pk, NULL, &internal_pk) == 1);
@@ -306,7 +306,7 @@ void test_xonly_pubkey_tweak_check(void) {
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(ctx, output_pk32, pk_parity, &internal_xonly_pk, overflows) == 0);
     CHECK(rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(ctx, &output_pk, &internal_xonly_pk, overflows) == 0);
     CHECK(rustsecp256k1_v0_4_1_memcmp_var(&output_pk, zeros64, sizeof(output_pk)) == 0);
-    CHECK(ecount == 5);
+    CHECK(ecount == 3);
 
     rustsecp256k1_v0_4_1_context_destroy(none);
     rustsecp256k1_v0_4_1_context_destroy(sign);
@@ -479,15 +479,15 @@ void test_keypair_add(void) {
     memset(overflows, 0xFF, 32);
     CHECK(rustsecp256k1_v0_4_1_keypair_create(ctx, &keypair, sk) == 1);
 
-    CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(none, &keypair, tweak) == 0);
-    CHECK(ecount == 1);
-    CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(sign, &keypair, tweak) == 0);
-    CHECK(ecount == 2);
+    CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(none, &keypair, tweak) == 1);
+    CHECK(ecount == 0);
+    CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(sign, &keypair, tweak) == 1);
+    CHECK(ecount == 0);
     CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(verify, &keypair, tweak) == 1);
     CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(verify, NULL, tweak) == 0);
-    CHECK(ecount == 3);
+    CHECK(ecount == 1);
     CHECK(rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(verify, &keypair, NULL) == 0);
-    CHECK(ecount == 4);
+    CHECK(ecount == 2);
     /* This does not set the keypair to zeroes */
     CHECK(rustsecp256k1_v0_4_1_memcmp_var(&keypair, zeros96, sizeof(keypair)) != 0);
 

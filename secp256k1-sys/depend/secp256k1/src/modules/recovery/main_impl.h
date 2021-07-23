@@ -84,7 +84,7 @@ int rustsecp256k1_v0_4_1_ecdsa_recoverable_signature_convert(const rustsecp256k1
     return 1;
 }
 
-static int rustsecp256k1_v0_4_1_ecdsa_sig_recover(const rustsecp256k1_v0_4_1_ecmult_context *ctx, const rustsecp256k1_v0_4_1_scalar *sigr, const rustsecp256k1_v0_4_1_scalar* sigs, rustsecp256k1_v0_4_1_ge *pubkey, const rustsecp256k1_v0_4_1_scalar *message, int recid) {
+static int rustsecp256k1_v0_4_1_ecdsa_sig_recover(const rustsecp256k1_v0_4_1_scalar *sigr, const rustsecp256k1_v0_4_1_scalar* sigs, rustsecp256k1_v0_4_1_ge *pubkey, const rustsecp256k1_v0_4_1_scalar *message, int recid) {
     unsigned char brx[32];
     rustsecp256k1_v0_4_1_fe fx;
     rustsecp256k1_v0_4_1_ge x;
@@ -115,7 +115,7 @@ static int rustsecp256k1_v0_4_1_ecdsa_sig_recover(const rustsecp256k1_v0_4_1_ecm
     rustsecp256k1_v0_4_1_scalar_mul(&u1, &rn, message);
     rustsecp256k1_v0_4_1_scalar_negate(&u1, &u1);
     rustsecp256k1_v0_4_1_scalar_mul(&u2, &rn, sigs);
-    rustsecp256k1_v0_4_1_ecmult(ctx, &qj, &xj, &u2, &u1);
+    rustsecp256k1_v0_4_1_ecmult(&qj, &xj, &u2, &u1);
     rustsecp256k1_v0_4_1_ge_set_gej_var(pubkey, &qj);
     return !rustsecp256k1_v0_4_1_gej_is_infinity(&qj);
 }
@@ -140,7 +140,6 @@ int rustsecp256k1_v0_4_1_ecdsa_recover(const rustsecp256k1_v0_4_1_context* ctx, 
     rustsecp256k1_v0_4_1_scalar m;
     int recid;
     VERIFY_CHECK(ctx != NULL);
-    ARG_CHECK(rustsecp256k1_v0_4_1_ecmult_context_is_built(&ctx->ecmult_ctx));
     ARG_CHECK(msghash32 != NULL);
     ARG_CHECK(signature != NULL);
     ARG_CHECK(pubkey != NULL);
@@ -148,7 +147,7 @@ int rustsecp256k1_v0_4_1_ecdsa_recover(const rustsecp256k1_v0_4_1_context* ctx, 
     rustsecp256k1_v0_4_1_ecdsa_recoverable_signature_load(ctx, &r, &s, &recid, signature);
     VERIFY_CHECK(recid >= 0 && recid < 4);  /* should have been caught in parse_compact */
     rustsecp256k1_v0_4_1_scalar_set_b32(&m, msghash32, NULL);
-    if (rustsecp256k1_v0_4_1_ecdsa_sig_recover(&ctx->ecmult_ctx, &r, &s, &q, &m, recid)) {
+    if (rustsecp256k1_v0_4_1_ecdsa_sig_recover(&r, &s, &q, &m, recid)) {
         rustsecp256k1_v0_4_1_pubkey_save(pubkey, &q);
         return 1;
     } else {

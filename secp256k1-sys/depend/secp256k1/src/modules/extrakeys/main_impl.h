@@ -120,12 +120,11 @@ int rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add(const rustsecp256k1_v0_4_1_conte
     VERIFY_CHECK(ctx != NULL);
     ARG_CHECK(output_pubkey != NULL);
     memset(output_pubkey, 0, sizeof(*output_pubkey));
-    ARG_CHECK(rustsecp256k1_v0_4_1_ecmult_context_is_built(&ctx->ecmult_ctx));
     ARG_CHECK(internal_pubkey != NULL);
     ARG_CHECK(tweak32 != NULL);
 
     if (!rustsecp256k1_v0_4_1_xonly_pubkey_load(ctx, &pk, internal_pubkey)
-        || !rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&ctx->ecmult_ctx, &pk, tweak32)) {
+        || !rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&pk, tweak32)) {
         return 0;
     }
     rustsecp256k1_v0_4_1_pubkey_save(output_pubkey, &pk);
@@ -137,13 +136,12 @@ int rustsecp256k1_v0_4_1_xonly_pubkey_tweak_add_check(const rustsecp256k1_v0_4_1
     unsigned char pk_expected32[32];
 
     VERIFY_CHECK(ctx != NULL);
-    ARG_CHECK(rustsecp256k1_v0_4_1_ecmult_context_is_built(&ctx->ecmult_ctx));
     ARG_CHECK(internal_pubkey != NULL);
     ARG_CHECK(tweaked_pubkey32 != NULL);
     ARG_CHECK(tweak32 != NULL);
 
     if (!rustsecp256k1_v0_4_1_xonly_pubkey_load(ctx, &pk, internal_pubkey)
-        || !rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&ctx->ecmult_ctx, &pk, tweak32)) {
+        || !rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&pk, tweak32)) {
         return 0;
     }
     rustsecp256k1_v0_4_1_fe_normalize_var(&pk.x);
@@ -260,7 +258,6 @@ int rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(const rustsecp256k1_v0_4_1_cont
     int ret;
 
     VERIFY_CHECK(ctx != NULL);
-    ARG_CHECK(rustsecp256k1_v0_4_1_ecmult_context_is_built(&ctx->ecmult_ctx));
     ARG_CHECK(keypair != NULL);
     ARG_CHECK(tweak32 != NULL);
 
@@ -273,7 +270,7 @@ int rustsecp256k1_v0_4_1_keypair_xonly_tweak_add(const rustsecp256k1_v0_4_1_cont
     }
 
     ret &= rustsecp256k1_v0_4_1_ec_seckey_tweak_add_helper(&sk, tweak32);
-    ret &= rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&ctx->ecmult_ctx, &pk, tweak32);
+    ret &= rustsecp256k1_v0_4_1_ec_pubkey_tweak_add_helper(&pk, tweak32);
 
     rustsecp256k1_v0_4_1_declassify(ctx, &ret, sizeof(ret));
     if (ret) {
